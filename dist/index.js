@@ -17,12 +17,19 @@ const openai = new openai_1.OpenAIApi(new openai_1.Configuration({
 function completion(literals, ...args) {
     var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
-        let str;
         if (typeof literals === 'string') {
-            str = literals;
+            literals = [literals];
         }
-        else {
-            str = literals.join();
+        let str = literals[0];
+        for (let i = 0; i < args.length; i++) {
+            const arg = args[i];
+            if (arg && arg.kind === 'Document') {
+                str += arg.loc.source.body;
+            }
+            else {
+                str += arg;
+            }
+            str += literals[i + 1];
         }
         const res = yield openai.createChatCompletion({
             messages: [{ role: 'user', content: str, }],

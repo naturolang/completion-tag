@@ -8,11 +8,18 @@ export async function completion(
   literals: string | readonly string[],
   ...args: any[]
 ): Promise<string> {
-  let str
   if (typeof literals === 'string') {
-    str = literals
-  } else {
-    str = literals.join()
+    literals = [literals]
+  }
+  let str = literals[0]
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg && arg.kind === 'Document') {
+      str += arg.loc.source.body
+    } else {
+      str += arg
+    }
+    str += literals[i + 1]
   }
   const res = await openai.createChatCompletion({
     messages: [{ role: 'user', content: str, }],
